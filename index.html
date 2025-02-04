@@ -147,7 +147,6 @@
         let isBreak = true;
         let beepSound;
         let stopSound;
-        let lastBeepTime = -1;  // Track the last time we played a beep
 
         const startButton = document.getElementById('startButton');
         const resetButton = document.getElementById('resetButton');
@@ -177,29 +176,19 @@
             breakDurationDisplay.textContent = formatTime(breakDuration);
             roundsDisplay.textContent = rounds;
             
+            // Update background color based on the current phase
             document.body.style.backgroundColor = isBreak ? 'white' : '#ff8da1';
         }
 
-        async function playBeep() {
-            if (enableSoundCheckbox.checked && time !== lastBeepTime) {
-                lastBeepTime = time;  // Update last beep time
-                try {
-                    beepSound.currentTime = 0;  // Reset the sound to start
-                    await beepSound.play();
-                } catch (error) {
-                    console.error('Error playing beep:', error);
-                }
+        function playBeep() {
+            if (enableSoundCheckbox.checked) {
+                beepSound.play();
             }
         }
 
-        async function playStop() {
+        function playStop() {
             if (enableSoundCheckbox.checked) {
-                try {
-                    stopSound.currentTime = 0;  // Reset the sound to start
-                    await stopSound.play();
-                } catch (error) {
-                    console.error('Error playing stop sound:', error);
-                }
+                stopSound.play();
             }
         }
 
@@ -207,15 +196,14 @@
             if (!isActive) {
                 isActive = true;
                 startButton.textContent = 'Pause';
-                lastBeepTime = -1;  // Reset the last beep time when starting
-                timer = setInterval(async () => {
+                timer = setInterval(() => {
                     if (time > 0) {
-                        if (time <= 3) {
-                            await playBeep();
+                        if (time <= 3 && time > 0) {
+                            playBeep(); // Play beep for last 3 seconds
                         }
                         time--;
                     } else {
-                        await playStop();
+                        playStop(); // Play stop sound when countdown reaches 0
                         if (isBreak) {
                             if (currentRound === rounds) {
                                 clearInterval(timer);
@@ -230,7 +218,6 @@
                             isBreak = true;
                             time = breakDuration;
                         }
-                        lastBeepTime = -1;  // Reset the last beep time when switching phases
                     }
                     updateDisplay();
                 }, 1000);
@@ -248,7 +235,6 @@
             currentRound = 1;
             isBreak = true;
             startButton.textContent = 'Start';
-            lastBeepTime = -1;  // Reset the last beep time when resetting
             updateDisplay();
         }
 
